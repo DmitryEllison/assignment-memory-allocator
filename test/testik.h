@@ -1,0 +1,10 @@
+//
+// Created by zanoo on 19/01/2023.
+//
+
+#ifndef ASSIGNMENT_MEMORY_ALLOCATOR_TESTIK_H
+#define ASSIGNMENT_MEMORY_ALLOCATOR_TESTIK_H
+
+#endif //ASSIGNMENT_MEMORY_ALLOCATOR_TESTIK_H
+
+void testik();
