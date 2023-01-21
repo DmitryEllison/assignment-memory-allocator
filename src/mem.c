@@ -80,7 +80,7 @@ static bool split_if_too_big( struct block_header* block, size_t query ) {
         return false;
 
     // TODO else init first block
-    size_t size_of_second_block = size_from_capacity(block->capacity).bytes - size_from_capacity((block_capacity) {query}).bytes;
+    size_t size_of_second_block = block->capacity.bytes - size_from_capacity((block_capacity) {query}).bytes;
 
     block_init(block,
                size_from_capacity((block_capacity) {query}),
@@ -91,8 +91,7 @@ static bool split_if_too_big( struct block_header* block, size_t query ) {
 
     // TODO init second block
     block_init(block->next,
-               // TODO find the second value out
-               size_of_second_block,
+               (block_size) {size_of_second_block},
                next_of_second_block);
     return true;
 }
@@ -122,7 +121,13 @@ static bool try_merge_with_next( struct block_header* block ) {
         return true;
     }
     return false;
+}
 
+void merge_free_blocks(struct block_header*  header){
+    while (header->next) {
+        try_merge_with_next(header);
+        header->next = header->next->next;
+    }
 }
 
 
@@ -210,6 +215,8 @@ void* _malloc( size_t query ) {
           size_max(query, BLOCK_MIN_CAPACITY),
           (struct block_header*) HEAP_START);
 
+    // TODO delete debug_things
+    debug_struct_info(stdout, addr);
     // TODO return content of block and ban block
     if (addr) {
         addr->is_free = false;
@@ -223,10 +230,9 @@ static struct block_header* block_get_header(void* contents) {
 }
 
 void _free( void* mem ) {
-  if (!mem) return ;
+    if (!mem) return ;
 
-  struct block_header* header = block_get_header( mem );
-  header->is_free = true;
-
-  while (try_merge_with_next(header) == true);
+    struct block_header* header = block_get_header( mem );
+    header->is_free = true;
+    merge_free_blocks(header);
 }
