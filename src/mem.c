@@ -185,15 +185,14 @@ static struct block_header* memalloc( size_t query, struct block_header* heap_st
     struct block_search_result result = try_memalloc_existing(query, heap_start);
 
     // TODO if not then grow heap to min_size_region and query
-    if (result.type == BSR_REACHED_END_NOT_FOUND) {
-        grow_heap(result.block, query);
-        return try_memalloc_existing(query, heap_start).block;
-    } else if (result.type == BSR_FOUND_GOOD_BLOCK) {
-        result.block->is_free = false;
-        return result.block;
-    } else {
+    if (result.type == BSR_CORRUPTED) {
         return NULL;
     }
+    if (result.type == BSR_REACHED_END_NOT_FOUND) {
+        grow_heap(result.block, query);
+        result = try_memalloc_existing(query, heap_start);
+    }
+    return result.block;
 }
 
 void* _malloc( size_t query ) {
@@ -202,9 +201,12 @@ void* _malloc( size_t query ) {
           size_max(query, BLOCK_MIN_CAPACITY),
           (struct block_header*) HEAP_START);
 
-    // TODO return content of block
-    if (addr) return addr->contents;
-    else return NULL;
+    // TODO return content of block and ban block
+    if (addr) {
+        addr->is_free = false;
+        return addr->contents;
+    }
+    return NULL;
 }
 
 static struct block_header* block_get_header(void* contents) {
@@ -217,5 +219,5 @@ void _free( void* mem ) {
   struct block_header* header = block_get_header( mem );
   header->is_free = true;
 
-  while (!try_merge_with_next(header) == true);
+  while (try_merge_with_next(header) == true);
 }
