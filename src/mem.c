@@ -44,15 +44,17 @@ static void* map_pages(void const* addr, size_t length, int additional_flags) {
 }
 
 /*  аллоцировать регион памяти и инициализировать его блоком */
-static struct region alloc_region  ( void * addr, size_t query ) {
+static struct region alloc_region  ( void const* addr, size_t query ) {
     query = region_actual_size(query);
     block_size size = size_from_capacity((block_capacity) {query});
-    block_init(addr, size, NULL);
 
-    // TODO map_pages can return MAP_FAILED
-    map_pages(addr, query, MAP_FIXED);
-
-    return (struct region) {(void*) addr, query, false};
+    // TODO map_pages can return another void* pointer
+    void* new_addr = map_pages(addr, query, MAP_FIXED);
+    if (new_addr != addr) {
+        new_addr = map_pages(addr, query, 0);
+    }
+    block_init(new_addr, size, NULL);
+    return (struct region) {(void*) new_addr, query, false};
 }
 
 static void* block_after( struct block_header const* block );
