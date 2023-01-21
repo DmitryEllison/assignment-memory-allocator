@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+// linux fans...
 #include <sys/mman.h>
 
 #define HEAP_START ((void*)0x04040000)

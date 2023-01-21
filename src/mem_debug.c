@@ -3,19 +3,17 @@
 #include "mem_internals.h"
 #include "mem.h"
 
-void debug_struct_info( FILE* f,
-                                 void const* addr ) {
-
-  struct block_header const* header =  addr;
-  fprintf( f,
-           "%10p %10zu %8s   ",
-           addr,
-           header-> capacity.bytes,
-           header-> is_free? "free" : "taken"
-           );
-  for ( size_t i = 0; i < DEBUG_FIRST_BYTES && i < header -> capacity.bytes; ++i )
-    fprintf( f, "%hhX", header-> contents[i] );
-  fprintf( f, "\n" );
+void debug_struct_info( FILE* f, void const* addr ) {
+    struct block_header const* header =  addr;
+        fprintf( f,
+        "%10p %10zu %8s   ",
+        addr,
+        header-> capacity.bytes,
+        header-> is_free? "free" : "taken"
+    );
+    for ( size_t i = 0; i < DEBUG_FIRST_BYTES && i < header -> capacity.bytes; ++i )
+        fprintf( f, "%hhX", header-> contents[i] );
+    fprintf( f, "\n" );
 }
 
 
