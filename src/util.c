@@ -14,3 +14,4 @@ _Noreturn void err( const char* msg, ... ) {
 
 
 extern inline size_t size_max( size_t x, size_t y );
+

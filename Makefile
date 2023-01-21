@@ -11,8 +11,8 @@ build:
 	mkdir -p $(BUILDDIR)
 
 # check makefile -------------------
-build/check : test/testik.o main.o
-	gcc build/testik.o build/main.o -o check
+check : test/testik.o main.o
+	gcc build/testik.o build/main.o -o build/check
 # end of check makefile -------------------
 
 $(BUILDDIR)/mem.o: $(SRCDIR)/mem.c build
