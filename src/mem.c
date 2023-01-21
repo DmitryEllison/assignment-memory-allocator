@@ -130,11 +130,17 @@ static struct block_header* memalloc( size_t query, struct block_header* heap_st
         heap_init(REGION_MIN_SIZE);
     }
     // TODO check block is not exist
-    return try_memalloc_existing(query, heap_start).block;
+    struct block_search_result result = try_memalloc_existing(query, heap_start);
+    if (result.type == BSR_REACHED_END_NOT_FOUND) {
+        grow_heap(result.block, query);
+    }
 }
 
 void* _malloc( size_t query ) {
-  struct block_header* const addr = memalloc( query, (struct block_header*) HEAP_START );
+  struct block_header* const addr = memalloc(
+          size_max(query, BLOCK_MIN_CAPACITY),
+          (struct block_header*) HEAP_START);
+
   if (addr) return addr->contents;
   else return NULL;
 }
