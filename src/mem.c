@@ -80,15 +80,18 @@ static bool split_if_too_big( struct block_header* block, size_t query ) {
         return false;
 
     // TODO else init first block
-    block_size size_of_second_block = size_from_capacity(block->capacity);
-    void* next_of_second_block = block->next;
+    size_t size_of_second_block = size_from_capacity(block->capacity).bytes - size_from_capacity((block_capacity) {query}).bytes;
 
     block_init(block,
                size_from_capacity((block_capacity) {query}),
-               block->contents + query);
+               NULL);
+
+    void* next_of_second_block = block->next;
+    block->next = block_after(block);
 
     // TODO init second block
     block_init(block->next,
+               // TODO find the second value out
                size_of_second_block,
                next_of_second_block);
     return true;
@@ -141,7 +144,7 @@ static struct block_search_result find_good_or_last( struct block_header* restri
 
     while (block->next) {
         if (block->is_free && block_is_big_enough(sz, block))
-            return (struct block_search_result) { .type = BSR_FOUND_GOOD_BLOCK, .block = block };
+            return (struct block_search_result) {.type = BSR_FOUND_GOOD_BLOCK, .block = block};
         block->next = block->next->next;
     }
 
@@ -187,16 +190,13 @@ static struct block_header* memalloc( size_t query, struct block_header* heap_st
     // TODO if not then grow heap to min_size_region and query
     switch (result.type) {
         case BSR_FOUND_GOOD_BLOCK:
-            printf("[\ttry_memalloc_existing returned BSR_FOUND_GOOD_BLOCK]\n");
+            // log
             break;
         case BSR_REACHED_END_NOT_FOUND:
-            printf("[\ttry_memalloc_existing returned BSR_REACHED_END_NOT_FOUND]\n");
             grow_heap(result.block, query);
-            printf("[\tgrowing heap]\n");
             result = try_memalloc_existing(query, heap_start);
             break;
         case BSR_CORRUPTED:
-            printf("[\ttry_memalloc_existing returned BSR_CORRUPTED]\n");
             return NULL;
         default:
             return NULL;

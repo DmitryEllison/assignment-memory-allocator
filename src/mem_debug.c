@@ -6,8 +6,9 @@
 void debug_struct_info( FILE* f, void const* addr ) {
     struct block_header const* header =  addr;
         fprintf( f,
-        "%10p %10zu %8s   ",
+        "%10p %10p %10zu %8s   ",
         addr,
+        (void*)&header->next,
         header-> capacity.bytes,
         header-> is_free? "free" : "taken"
     );
@@ -19,7 +20,7 @@ void debug_struct_info( FILE* f, void const* addr ) {
 
 void debug_heap( FILE* f,  void const* ptr ) {
   fprintf( f, " --- Heap ---\n");
-  fprintf( f, "%10s %10s %8s %10s\n", "start", "capacity", "status", "contents" );
+  fprintf( f, "%10s %10s %10s %8s %10s\n", "start", "next", "capacity", "status", "contents" );
   for(struct block_header const* header =  ptr; header; header = header ->next )
     debug_struct_info( f, header );
 }
