@@ -4,7 +4,7 @@ SRCDIR=src
 TESTIKDIR=test
 CC=gcc
 
-all: $(BUILDDIR)/mem.o $(BUILDDIR)/util.o $(BUILDDIR)/mem_debug.o $(BUILDDIR)/testik.o $(BUILDDIR)/main.o
+all: $(BUILDDIR)/mem.o $(BUILDDIR)/util.o $(BUILDDIR)/mem_debug.o $(BUILDDIR)/main.o $(BUILDDIR)/testik.o
 	$(CC) -o $(BUILDDIR)/main $^
 
 build:
@@ -12,7 +12,7 @@ build:
 
 # check makefile -------------------
 check : test/testik.o main.o
-	gcc build/testik.o build/main.o -o build/check
+	gcc build/main.o build/testik.o -o build/check
 # end of check makefile -------------------
 
 $(BUILDDIR)/mem.o: $(SRCDIR)/mem.c build

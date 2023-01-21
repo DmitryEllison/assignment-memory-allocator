@@ -44,13 +44,14 @@ static void* map_pages(void const* addr, size_t length, int additional_flags) {
 }
 
 /*  аллоцировать регион памяти и инициализировать его блоком */
-static struct region alloc_region  ( void const * addr, size_t query ) {
+static struct region alloc_region  ( void * addr, size_t query ) {
     query = region_actual_size(query);
     block_size size = size_from_capacity((block_capacity) {query});
     block_init(addr, size, NULL);
 
     // TODO map_pages can return MAP_FAILED
     map_pages(addr, query, MAP_FIXED);
+
     return (struct region) {(void*) addr, query, false};
 }
 
@@ -166,8 +167,14 @@ static struct block_search_result try_memalloc_existing ( size_t query, struct b
 
 static struct block_header* grow_heap( struct block_header* restrict last, size_t query ) {
     // TODO grow heap
-    query = size_max(query, REGION_MIN_SIZE);
-    block_init(last, size_from_capacity((block_capacity){query}), NULL);
+    struct region new_region = alloc_region(block_after(last),
+                                        size_max(query, REGION_MIN_SIZE));
+
+    if (!region_is_invalid(&new_region)) {
+        last->next = new_region.addr;
+        return new_region.addr;
+    }
+    return NULL;
 }
 
 /*  Реализует основную логику malloc и возвращает заголовок выделенного блока */
