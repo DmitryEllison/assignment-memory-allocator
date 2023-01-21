@@ -185,12 +185,21 @@ static struct block_header* memalloc( size_t query, struct block_header* heap_st
     struct block_search_result result = try_memalloc_existing(query, heap_start);
 
     // TODO if not then grow heap to min_size_region and query
-    if (result.type == BSR_CORRUPTED) {
-        return NULL;
-    }
-    if (result.type == BSR_REACHED_END_NOT_FOUND) {
-        grow_heap(result.block, query);
-        result = try_memalloc_existing(query, heap_start);
+    switch (result.type) {
+        case BSR_FOUND_GOOD_BLOCK:
+            printf("[\ttry_memalloc_existing returned BSR_FOUND_GOOD_BLOCK]\n");
+            break;
+        case BSR_REACHED_END_NOT_FOUND:
+            printf("[\ttry_memalloc_existing returned BSR_REACHED_END_NOT_FOUND]\n");
+            grow_heap(result.block, query);
+            printf("[\tgrowing heap]\n");
+            result = try_memalloc_existing(query, heap_start);
+            break;
+        case BSR_CORRUPTED:
+            printf("[\ttry_memalloc_existing returned BSR_CORRUPTED]\n");
+            return NULL;
+        default:
+            return NULL;
     }
     return result.block;
 }
