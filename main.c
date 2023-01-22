@@ -1,7 +1,8 @@
 #include "test/testik.h"
 
 int main() {
-    heap_init(REGION_MIN_SIZE);
+    if (heap_init(REGION_MIN_SIZE) == NULL)
+        return -1;
     testik();
     return 0;
 }

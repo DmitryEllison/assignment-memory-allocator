@@ -53,6 +53,7 @@ static struct region alloc_region  ( void const* addr, size_t query ) {
     if (new_addr != addr) {
         new_addr = map_pages(addr, query, 0);
     }
+
     block_init(new_addr, size, NULL);
     return (struct region) {(void*) new_addr, query, false};
 }
@@ -60,10 +61,10 @@ static struct region alloc_region  ( void const* addr, size_t query ) {
 static void* block_after( struct block_header const* block );
 
 void* heap_init( size_t initial ) {
-  const struct region region = alloc_region( HEAP_START, initial );
-  if ( region_is_invalid(&region) ) return NULL;
-
-  return region.addr;
+    const struct region region = alloc_region( HEAP_START, initial );
+    printf("NEXT OF HEAP %p", (void*)(&((struct block_header*)region.addr)->next));
+    if ( region_is_invalid(&region) ) return NULL;
+    return region.addr;
 }
 
 #define BLOCK_MIN_CAPACITY 24
@@ -165,6 +166,7 @@ static struct block_search_result try_memalloc_existing ( size_t query, struct b
     // TODO check find good or last
     struct block_search_result result = find_good_or_last(block, query);
 
+    printf("\n---- current: %p ---- next: %p ----\n",(void*)block,(void*)&block->next);
     // TODO in a good way return split block
     if (result.type == BSR_FOUND_GOOD_BLOCK) {
         split_if_too_big(result.block, query);
@@ -202,6 +204,7 @@ static struct block_header* memalloc( size_t query, struct block_header* heap_st
             result = try_memalloc_existing(query, heap_start);
             break;
         case BSR_CORRUPTED:
+            // log
             return NULL;
         default:
             return NULL;
@@ -215,8 +218,6 @@ void* _malloc( size_t query ) {
           size_max(query, BLOCK_MIN_CAPACITY),
           (struct block_header*) HEAP_START);
 
-    // TODO delete debug_things
-    debug_struct_info(stdout, addr);
     // TODO return content of block and ban block
     if (addr) {
         addr->is_free = false;
