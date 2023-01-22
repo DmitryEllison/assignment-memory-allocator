@@ -54,7 +54,7 @@ bool test3() {
 }
 
 void testik() {
-    test2();
-    test1();
-    test3();
+    if (test2()) printf("TEST 2 PASSED\n");
+    if (test1()) printf("TEST 1 PASSED\n");
+    if (test3()) printf("TEST 3 PASSED\n");
 }
