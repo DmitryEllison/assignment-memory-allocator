@@ -58,7 +58,6 @@ static struct region alloc_region  ( void const* addr, size_t query ) {
     }
 
     block_init(new_addr, size, NULL);
-    //debug_struct_info(stdout, new_addr);
 
     return (struct region) {(void*) new_addr, query, false};
 }
@@ -99,8 +98,6 @@ static bool split_if_too_big( struct block_header* block, size_t query ) {
     block_init(block->next,
                (block_size) {size_of_second_block},
                next_of_second_block);
-    //debug_struct_info(stdout, block);
-    //debug_struct_info(stdout, block->next);
     return true;
 }
 
@@ -188,6 +185,7 @@ static struct block_header* grow_heap( struct block_header* restrict last, size_
         last->next = new_region.addr;
         return new_region.addr;
     }
+    merge_free_blocks(HEAP_START);
     return NULL;
 }
 
