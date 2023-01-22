@@ -8,7 +8,7 @@ void debug_struct_info( FILE* f, void const* addr ) {
         fprintf( f,
         "%10p %10p %10zu %8s   ",
         addr,
-        (void*)&header->next,
+        (void*)(header->next),
         header-> capacity.bytes,
         header-> is_free? "free" : "taken"
     );

@@ -91,6 +91,7 @@ static bool split_if_too_big( struct block_header* block, size_t query ) {
                size_from_capacity((block_capacity) {query}),
                NULL);
 
+
     void* next_of_second_block = block->next;
     block->next = block_after(block);
 
@@ -98,6 +99,8 @@ static bool split_if_too_big( struct block_header* block, size_t query ) {
     block_init(block->next,
                (block_size) {size_of_second_block},
                next_of_second_block);
+    //debug_struct_info(stdout, block);
+    //debug_struct_info(stdout, block->next);
     return true;
 }
 
