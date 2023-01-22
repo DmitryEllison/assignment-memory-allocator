@@ -45,6 +45,9 @@ static void* map_pages(void const* addr, size_t length, int additional_flags) {
 
 /*  аллоцировать регион памяти и инициализировать его блоком */
 static struct region alloc_region  ( void const* addr, size_t query ) {
+    if (addr == NULL)
+        return REGION_INVALID;
+
     query = region_actual_size(query);
     block_size size = size_from_capacity((block_capacity) {query});
 
@@ -55,6 +58,8 @@ static struct region alloc_region  ( void const* addr, size_t query ) {
     }
 
     block_init(new_addr, size, NULL);
+    //debug_struct_info(stdout, new_addr);
+
     return (struct region) {(void*) new_addr, query, false};
 }
 
@@ -62,7 +67,6 @@ static void* block_after( struct block_header const* block );
 
 void* heap_init( size_t initial ) {
     const struct region region = alloc_region( HEAP_START, initial );
-    printf("NEXT OF HEAP %p", (void*)(&((struct block_header*)region.addr)->next));
     if ( region_is_invalid(&region) ) return NULL;
     return region.addr;
 }
@@ -166,7 +170,6 @@ static struct block_search_result try_memalloc_existing ( size_t query, struct b
     // TODO check find good or last
     struct block_search_result result = find_good_or_last(block, query);
 
-    printf("\n---- current: %p ---- next: %p ----\n",(void*)block,(void*)&block->next);
     // TODO in a good way return split block
     if (result.type == BSR_FOUND_GOOD_BLOCK) {
         split_if_too_big(result.block, query);
