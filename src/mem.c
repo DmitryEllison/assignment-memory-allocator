@@ -48,7 +48,7 @@ static struct region alloc_region  ( void const* addr, size_t query ) {
     if (addr == NULL)
         return REGION_INVALID;
 
-    query = region_actual_size(query);
+    query = size_from_capacity((block_capacity) {region_actual_size(query)}).bytes;
     block_size size = size_from_capacity((block_capacity) {query});
 
     // TODO map_pages can return another void* pointer
@@ -85,7 +85,7 @@ static bool split_if_too_big( struct block_header* block, size_t query ) {
         return false;
 
     // TODO else init first block
-    size_t size_of_second_block = block->capacity.bytes - size_from_capacity((block_capacity) {query}).bytes;
+    size_t size_of_second_block = size_from_capacity(block->capacity).bytes - size_from_capacity((block_capacity) {query}).bytes;
 
     block_init(block,
                size_from_capacity((block_capacity) {query}),
@@ -133,8 +133,9 @@ static bool try_merge_with_next( struct block_header* block ) {
 
 void merge_free_blocks(struct block_header*  header){
     while (header->next) {
-        try_merge_with_next(header);
-        header->next = header->next->next;
+        // if merged then try it with next one
+        if(!try_merge_with_next(header))
+            header = header->next;
     }
 }
 
@@ -158,13 +159,15 @@ static struct block_search_result find_good_or_last( struct block_header* restri
     while (block->next) {
         if (block->is_free && block_is_big_enough(sz, block))
             return (struct block_search_result) {.type = BSR_FOUND_GOOD_BLOCK, .block = block};
-        block->next = block->next->next;
+        block= block->next;
     }
 
+    struct block_search_result result =  (struct block_search_result) {
+            .type = block_is_big_enough(sz, block) && block->is_free ? BSR_FOUND_GOOD_BLOCK : BSR_REACHED_END_NOT_FOUND,
+            .block = block };
+
     // TODO return last one
-    return (struct block_search_result) {
-        .type = block_is_big_enough(sz, block) && block->is_free ? BSR_FOUND_GOOD_BLOCK : BSR_REACHED_END_NOT_FOUND,
-        .block = block };
+    return result;
 }
 
 /*  Попробовать выделить память в куче начиная с блока `block` не пытаясь расширить кучу
@@ -172,13 +175,6 @@ static struct block_search_result find_good_or_last( struct block_header* restri
 static struct block_search_result try_memalloc_existing ( size_t query, struct block_header* block ) {
     // TODO check find good or last
     struct block_search_result result = find_good_or_last(block, query);
-
-    // TODO in a good way return split block
-    if (result.type == BSR_FOUND_GOOD_BLOCK) {
-        split_if_too_big(result.block, query);
-        return result;
-    }
-
     return result;
 }
 
@@ -203,12 +199,14 @@ static struct block_header* memalloc( size_t query, struct block_header* heap_st
     // TODO if not then grow heap to min_size_region and query
     switch (result.type) {
         case BSR_FOUND_GOOD_BLOCK:
-            // log
+            split_if_too_big(result.block, query);
             break;
+
         case BSR_REACHED_END_NOT_FOUND:
             grow_heap(result.block, query);
             result = try_memalloc_existing(query, heap_start);
             break;
+
         case BSR_CORRUPTED:
             // log
             return NULL;
@@ -241,5 +239,5 @@ void _free( void* mem ) {
 
     struct block_header* header = block_get_header( mem );
     header->is_free = true;
-    merge_free_blocks(header);
+    merge_free_blocks(HEAP_START);
 }

@@ -6,10 +6,11 @@
 void debug_struct_info( FILE* f, void const* addr ) {
     struct block_header const* header =  addr;
         fprintf( f,
-        "%10p %10p %10zu %8s   ",
+        "%10p %10p %10zu %10zu %8s   ",
         addr,
         (void*)(header->next),
         header-> capacity.bytes,
+        size_from_capacity(header-> capacity).bytes,
         header-> is_free? "free" : "taken"
     );
     for ( size_t i = 0; i < DEBUG_FIRST_BYTES && i < header -> capacity.bytes; ++i )
@@ -19,8 +20,8 @@ void debug_struct_info( FILE* f, void const* addr ) {
 
 
 void debug_heap( FILE* f,  void const* ptr ) {
-  fprintf( f, " --- Heap ---\n");
-  fprintf( f, "%10s %10s %10s %8s %10s\n", "start", "next", "capacity", "status", "contents" );
+  fprintf( f, "\n --- Heap ---\n");
+  fprintf( f, "%10s %10s %10s %12s %8s %10s\n", "start", "next", "capacity", "block_size", "status", "contents" );
   for(struct block_header const* header =  ptr; header; header = header ->next )
     debug_struct_info( f, header );
 }
