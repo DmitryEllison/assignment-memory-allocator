@@ -99,7 +99,7 @@ static bool split_if_too_big( struct block_header* block, size_t query ) {
 
 /*  --- Слияние соседних свободных блоков --- */
 
-static void* block_after( struct block_header const* block )              {
+static void* block_after( struct block_header const* block ) {
   return  (void*) (block->contents + block->capacity.bytes);
 }
 
@@ -140,7 +140,7 @@ struct block_search_result {
 
 
 static struct block_search_result find_good_or_last( struct block_header* restrict block, size_t sz )    {
-    struct block_search_result result;
+    struct block_search_result result = {0};
     if (block == NULL) {
         result.type = BSR_CORRUPTED;
         result.block = NULL;

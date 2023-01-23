@@ -3,10 +3,19 @@
 #include "mem_internals.h"
 #include "mem.h"
 
+
+struct block_header* head_of_block( void const* contents ) {
+    return  (void*) ((uint8_t*)contents - offsetof(struct block_header, contents));
+}
+
+size_t get_size_of_block(void const* contents) {
+    return size_from_capacity(head_of_block(contents)-> capacity).bytes;
+}
+
 void debug_struct_info( FILE* f, void const* addr ) {
     struct block_header const* header =  addr;
         fprintf( f,
-        "%10p %10p %10zu %10zu %8s   ",
+        "%12p %12p %12zu %12zu %8s   ",
         addr,
         (void*)(header->next),
         header-> capacity.bytes,
