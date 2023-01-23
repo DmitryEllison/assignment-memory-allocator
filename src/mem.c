@@ -141,28 +141,30 @@ struct block_search_result {
 
 static struct block_search_result find_good_or_last( struct block_header* restrict block, size_t sz )    {
     struct block_search_result result = {0};
+
     if (block == NULL) {
         result.type = BSR_CORRUPTED;
         result.block = NULL;
+        return result;
     }
 
     while (block->next) {
         if (block->is_free && block_is_big_enough(sz, block)) {
             result.type = BSR_FOUND_GOOD_BLOCK;
             result.block = block;
-            break;
+            return result;
         }
         block= block->next;
     }
 
     result.type = block_is_big_enough(sz, block) && block->is_free ? BSR_FOUND_GOOD_BLOCK : BSR_REACHED_END_NOT_FOUND;
     result.block = block;
+
     return result;
 }
 
 static struct block_search_result try_memalloc_existing ( size_t query, struct block_header* block ) {
-    struct block_search_result result = find_good_or_last(block, query);
-    return result;
+    return find_good_or_last(block, query);
 }
 
 
@@ -170,7 +172,7 @@ static struct block_header* grow_heap( struct block_header* restrict last, size_
     struct region new_region = alloc_region(block_after(last),
                                         size_max(query, REGION_MIN_SIZE));
 
-    if (!region_is_invalid(&new_region) && !last) {
+    if (!region_is_invalid(&new_region) && last) {
         last->next = new_region.addr;
         return new_region.addr;
     }

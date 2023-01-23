@@ -9,7 +9,12 @@ struct block_header* head_of_block( void const* contents ) {
 }
 
 size_t get_size_of_block(void const* contents) {
+    debug_struct_info(stdout, head_of_block(contents));
     return size_from_capacity(head_of_block(contents)-> capacity).bytes;
+}
+
+size_t get_capacity_of_block(void const* contents) {
+    return head_of_block(contents)-> capacity.bytes;
 }
 
 void debug_struct_info( FILE* f, void const* addr ) {

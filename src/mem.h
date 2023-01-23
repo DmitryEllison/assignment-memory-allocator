@@ -22,5 +22,6 @@ void debug_struct_info( FILE* f, void const* address );
 void debug_heap( FILE* f,  void const* ptr );
 struct block_header* head_of_block( void const* contents );
 size_t get_size_of_block(void const* contents);
+size_t get_capacity_of_block(void const* contents);
 
 #endif
