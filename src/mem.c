@@ -156,6 +156,7 @@ static struct block_search_result find_good_or_last( struct block_header* restri
     }
 
     result.type = block_is_big_enough(sz, block) && block->is_free ? BSR_FOUND_GOOD_BLOCK : BSR_REACHED_END_NOT_FOUND;
+    result.block = block;
     return result;
 }
 
