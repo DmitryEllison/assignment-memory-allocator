@@ -192,6 +192,7 @@ static struct block_header* memalloc( size_t query, struct block_header* heap_st
         case BSR_REACHED_END_NOT_FOUND:
             grow_heap(result.block, query);
             result = try_memalloc_existing(query, heap_start);
+            split_if_too_big(result.block, query);
             break;
         default:
             return NULL;

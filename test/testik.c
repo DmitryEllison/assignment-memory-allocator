@@ -1,6 +1,8 @@
 #include "testik.h"
 
-static bool DEBUG_LOG = 1;
+// show the heap
+static bool DEBUG_LOG = 0;
+
 #define TOO_SMALL (10)
 #define TEST_1_NUM 64
 #define TEST_2_NUM 256
@@ -87,7 +89,7 @@ bool test3() {
 }
 
 void testik() {
-    //if (test1()) printf("TEST 1 PASSED\n");
-    //if (test2()) printf("TEST 2 PASSED\n");
+    if (test1()) printf("TEST 1 PASSED\n");
+    if (test2()) printf("TEST 2 PASSED\n");
     if (test3()) printf("TEST 3 PASSED\n");
 }
